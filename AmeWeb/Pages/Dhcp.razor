@@ -1,0 +1,76 @@
+﻿@page "/dhcp/{Mac}"
+
+
+@using AmeDhcp.Data
+@using System.Net
+@inject DhcpService DhcpService
+@inject NavigationManager NavManager
+@inject IJSRuntime JsRuntime
+
+<h1>@entry.Mac</h1>
+
+@if (ErrorResult != null)
+{
+    <div class="alert-warning">
+        @ErrorResult
+    </div>
+}
+
+<EditForm Model=@entry OnSubmit=@FormSubmitted>
+    <DataAnnotationsValidator />
+    <div class="form-group">
+        <label for="Hostname">Hostname</label>
+        <InputText @bind-Value=entry.Hostname class="form-control" id="Hostname" />
+    </div>
+    <div class="form-group">
+        <label for="ClientIp">ClientIp</label>
+        <InputText @bind-Value=entry.ClientIp class="form-control" id="ClientIp" />
+    </div>
+
+    <div class="form-group">
+        <label>Gateway</label>
+        <InputSelect @bind-Value="entry.Gateway">
+            <option value="">Default</option>
+            <option value="192.168.8.1">T-Mobile</option>
+            <option value="192.168.8.2">NJU</option>
+        </InputSelect>
+    </div>
+
+    <input type="submit" class="btn btn-primary" value="Save" />
+    <button class="btn btn-primary" @onclick="()=>DeleteClient(entry.Mac, entry.Hostname)">Delete</button>
+    <a href="./dhcplist">Cancel</a>
+</EditForm>
+
+@code {
+    [Parameter]
+    public string Mac { get; set; }
+    private DhcpEntry entry = new DhcpEntry();
+    string ErrorResult;
+
+    protected override async Task OnInitializedAsync()
+    {
+        entry = await DhcpService.GetEntry(Mac);
+    }
+
+    void FormSubmitted(EditContext editContext)
+    {
+        if (IPAddress.TryParse(entry.ClientIp, out _))
+        {
+            DhcpService.Update(entry);
+            NavManager.NavigateTo("./dhcplist");
+        }
+        else
+        {
+            ErrorResult = "Invalid IP";
+        }
+    }
+
+    async Task DeleteClient(string mac, string hostName)
+    {
+        bool confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Czy na pewno chcesz usunąć?");
+        if (confirmed)
+        {
+            DhcpService.Delete(mac);
+        }
+    }
+}

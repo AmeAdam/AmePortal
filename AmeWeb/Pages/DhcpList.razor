@@ -1,0 +1,68 @@
+﻿@page "/dhcplist"
+
+@using AmeDhcp.Data
+@inject DhcpService DhcpService
+
+<h1>AME DHCP</h1>
+
+<p>Wybór gateway dla klientów sieci AME.</p>
+
+@if (dhcpEntries == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Hostname</th>
+                <th>IP</th>
+                <th>Gateway</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var entry in dhcpEntries)
+            {
+                <tr>
+                    <td><a href="./dhcp/@entry.Mac">@entry.Hostname</a></td>
+                    <td>@entry.ClientIp</td>
+                    <td>@GatewayName(entry.Gateway)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <div Visible="true">
+
+    </div>
+}
+
+@code {
+    private DhcpEntry[] dhcpEntries;
+
+    protected override async Task OnInitializedAsync()
+    {
+        dhcpEntries = (await DhcpService.GetEntries()).OrderBy(e => e.ClientIpAddress.Address).ToArray();
+    }
+
+    private async Task IncrementCount(string mac, string gateway)
+    {
+        DhcpService.Update(mac, gateway);
+        dhcpEntries = await DhcpService.GetEntries();
+    }
+
+    private string GatewayName(string ip)
+    {
+        switch (ip)
+        {
+            case "192.168.8.1": return "T-Mobile";
+            case "192.168.8.2": return "Nju";
+            default: return "";
+        }
+    }
+
+    private void Edit()
+    {
+
+    }
+}
