@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace AmeDhcp.Data
+namespace AmeWeb.Data
 {
     public class DhcpEntry
     {

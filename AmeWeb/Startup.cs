@@ -1,4 +1,3 @@
-using AmeDhcp.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Hosting;
@@ -9,8 +8,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AmeWeb.Data;
+using FroniusSolarClient;
 
-namespace AmeDhcp
+namespace AmeWeb
 {
     public class Startup
     {
@@ -28,6 +29,8 @@ namespace AmeDhcp
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddSingleton<DhcpService>();
+            services.AddSingleton<UnifiService>();
+            services.AddScoped<FroniusService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

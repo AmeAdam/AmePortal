@@ -1,7 +1,69 @@
 ﻿@page "/"
-
+@using AmeWeb.Data
+@using ChartJs.Blazor.Common
+@using ChartJs.Blazor.PieChart
+@using ChartJs.Blazor.Util
+@using System.Reactive.Linq
+@using System
+@inject FroniusService FroniusService
 <h1>AME Niwy</h1>
 
+@if (Data == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div>Aktualna Moc @Data.Power Wat</div>
+    <div>Dzienna produkcja @Data.DayPower.ToString("F1") kWh</div>
+    <div>Totalna produkcja @Data.TotalPower.ToString("F0") kWh</div>
+    <Chart Config="_config"></Chart>
+}
 
 @code {
+    FroniusData Data { get; set; }
+    private PieConfig _config;
+    private IDisposable froniusSubscription;
+
+    PieDataset<int> dataset = new PieDataset<int>(new[] { 0, 8250 })
+    {
+        BackgroundColor = new[]
+        {
+            ColorUtil.ColorHexString(75, 255, 192), // Slice 3 aka "Green"
+            ColorUtil.ColorHexString(255, 205, 86), // Slice 2 aka "Yellow"
+        }
+    };
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        froniusSubscription = Observable.Interval(TimeSpan.FromSeconds(5)).Subscribe(RefreshFroniusData);
+
+        _config = new PieConfig
+        {
+            Options = new PieOptions
+            {
+                Responsive = true,
+                Title = new OptionsTitle
+                {
+                    Display = true,
+                    Text = "ChartJs.Blazor Pie Chart"
+                }
+            }
+        };
+        _config.Data.Labels.Add("_ %");
+        _config.Data.Datasets.Add(dataset);
+    }
+
+    private void RefreshFroniusData(long ticks)
+    {
+        Data = FroniusService.GetSolarData().Result;
+
+        this.dataset[0] = Data.Power;
+        this.dataset[1] = 8250 - Data.Power;
+
+        _config.Data.Labels[0] = $"{Data.PowerPercent} %";
+        InvokeAsync(this.StateHasChanged);
+    }
+
 }

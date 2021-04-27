@@ -15,7 +15,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "AmeDhcp": {
+    "AmeWeb": {
       "commandName": "Project",
       "dotnetRunMessages": "true",
       "launchBrowser": true,

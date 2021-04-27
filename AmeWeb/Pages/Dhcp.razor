@@ -1,9 +1,9 @@
 ﻿@page "/dhcp/{Mac}"
 
-
-@using AmeDhcp.Data
 @using System.Net
+@using AmeWeb.Data
 @inject DhcpService DhcpService
+@inject UnifiService UnifiService
 @inject NavigationManager NavManager
 @inject IJSRuntime JsRuntime
 
@@ -38,6 +38,8 @@
 
     <input type="submit" class="btn btn-primary" value="Save" />
     <button class="btn btn-primary" @onclick="()=>DeleteClient(entry.Mac, entry.Hostname)">Delete</button>
+    <button class="btn btn-primary" @onclick="()=>BlockClient(entry.Mac, entry.Hostname)">Block</button>
+    <button class="btn btn-primary" @onclick="()=>UnblockClient(entry.Mac, entry.Hostname)">Unblock</button>
     <a href="./dhcplist">Cancel</a>
 </EditForm>
 
@@ -73,4 +75,15 @@
             DhcpService.Delete(mac);
         }
     }
+
+    private async Task BlockClient(string mac, string hostname)
+    {
+        await UnifiService.BlockClient(mac);
+    }
+
+    private async Task UnblockClient(string mac, string hostname)
+    {
+        await UnifiService.UnblockClient(mac);
+    }
+
 }
